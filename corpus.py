@@ -1,67 +1,44 @@
+# ANDRE LUIZ KOVALSKI
+
+# Sua  tarefa  será  transformar  um  conjunto  de  5  sites,  sobre  o  tema  de  processamento  de 
+# linguagem natural em um conjunto de cinco listas distintas de sentenças. Ou seja, você fará uma função 
+# que, usando a biblioteca Beautifull Soap, faça a requisição de uma url, e extrai todas as sentenças desta 
+# url. Duas condições são importantes:  
+# a) A página web (url) deve apontar para uma página web em inglês contendo, não menos que 
+# 1000 palavras.  
+# b) O texto desta página deverá ser transformado em um array de senteças.  
+ 
+# Para separar as sentenças você pode usar os sinais de pontuação ou as funções da biblibioteca 
+# Spacy. 
+
 from bs4 import BeautifulSoup
 import requests
-from IPython.display import display
-import pandas as pd
+import re
 
-urlList = {
-    "https://en.wikipedia.org/wiki/Natural_language_processing",
-    "https://www.ibm.com/cloud/learn/natural-language-processing",
-    "https://www.techtarget.com/searchenterpriseai/definition/natural-language-processing-NLP",
-    "https://www.coursera.org/specializations/natural-language-processing",
-    "https://www.datarobot.com/blog/what-is-natural-language-processing-introduction-to-nlp/"
-}
+urls = [
+    'https://towardsdatascience.com/your-guide-to-natural-language-processing-nlp-48ea2511f6e1',
+    'https://en.wikipedia.org/wiki/Natural_language_processing',
+    'https://www.techtarget.com/searchenterpriseai/definition/natural-language-processing-NLP',
+    'https://www.datarobot.com/blog/what-is-natural-language-processing-introduction-to-nlp/',
+    'https://www.ibm.com/cloud/learn/natural-language-processing'
+]
 
-def main():
-    corpus = []
-    for url in urlList:
-        urlRequest = requests.get(url)
-        contents = urlRequest.content
-        text = BeautifulSoup(contents, 'html.parser').text
-        docSents = []
+docSents = []
 
-        currentSent = ""
-        for letter in text: 
-            if(letter == "." or letter == "?" or letter == "!" or letter == ";" or letter == "\n"  or letter == "\t"):
-                if(not(currentSent.isspace()) and len(currentSent) > 0):
-                    docSents.append(currentSent)
-                    currentSent = ""
-                else:
-                    currentSent = ""
-            else:
-                currentSent += letter
-        corpus.append(docSents)
-    
-    ############################################################
+for url in urls:
+    html = requests.get(url)
+    soup = (BeautifulSoup(html.text, "html.parser"))
 
-    corpusWords = []
+    doc = []
+    for script in soup(["script", "style"]):
+        script.decompose()
 
-    for doc in corpus:
-        docArray = []
-        for sent in doc:
-            words = sent.split(" ")
-            docArray.append(words)
-        corpusWords.append(docArray)
-    
-    ############################################################
+    text = re.sub(r"[\n\t]", "", soup.get_text())
 
-    frequencia = {}
+    # https://stackoverflow.com/a/25736082
+    for sentencas in re.split("(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)", text):
+        doc.append(sentencas)
+    docSents.append(doc)
 
-    for doc in corpusWords:
-        for sent in doc:
-            for words in sent:
-                if words != "":
-                    if words in frequencia.keys():
-                        frequencia[words] += 1
-                    else:
-                        frequencia[words] = 1
-
-    frequencia = sorted(frequencia.items(), key=lambda x:x[1])
-
-    df = pd.DataFrame(frequencia)
-    # displaying the DataFrame
-    display(df)
-
-    ############################################################
-
-if (__name__ == "__main__"):
-    main()
+for sents in docSents:
+    print(sents)
