@@ -1,4 +1,4 @@
-#  André Luiz Kovalski
+#  ANDRÉ LUIZ KOVALSKI
 
 # Sua tarefa será gerar a matriz termo-documento usando TF-IDF por meio da aplicação das 
 # fórmulas  TF-IDF  na  matriz  termo-documento  criada  com  a  utilização  do  algoritmo  Bag of 
